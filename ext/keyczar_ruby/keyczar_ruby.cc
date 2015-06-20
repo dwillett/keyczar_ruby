@@ -49,12 +49,34 @@ extern "C" {
     return rb_str_new2(cryptext.c_str());
   }
 
+  static VALUE keyczar_encrypt_compressed(VALUE self, VALUE plaintext){
+    keyczar::Crypter* crypter;
+    Data_Get_Struct(self, keyczar::Crypter, crypter);
+    crypter->set_compression(keyczar::Keyczar::GZIP);
+
+    Check_Type(plaintext, T_STRING);
+    std::string cryptext=crypter->Encrypt(RSTRING_PTR(plaintext));
+
+    return rb_str_new2(cryptext.c_str());
+  }
+
   static VALUE keyczar_decrypt(VALUE self, VALUE cryptext){
     keyczar::Crypter* crypter;
     Data_Get_Struct(self, keyczar::Crypter, crypter);
 
     Check_Type(cryptext, T_STRING);
     std::string plaintext=crypter->Decrypt(RSTRING_PTR(cryptext));
+    return rb_str_new2(plaintext.c_str());
+  }
+
+  static VALUE keyczar_decrypt_compressed(VALUE self, VALUE cryptext){
+    keyczar::Crypter* crypter;
+    Data_Get_Struct(self, keyczar::Crypter, crypter);
+    crypter->set_compression(keyczar::Keyczar::GZIP);
+
+    Check_Type(cryptext, T_STRING);
+    std::string plaintext=crypter->Decrypt(RSTRING_PTR(cryptext));
+
     return rb_str_new2(plaintext.c_str());
   }
 
@@ -85,7 +107,9 @@ extern "C" {
     c_Crypter = rb_define_class_under(m_Keyczar, "Crypter", rb_cObject);
 
     rb_define_method(c_Crypter, "encrypt", (ruby_method*) &keyczar_encrypt, 1);
+    rb_define_method(c_Crypter, "encrypt_compressed", (ruby_method*) &keyczar_encrypt_compressed, 1);
     rb_define_method(c_Crypter, "decrypt", (ruby_method*) &keyczar_decrypt, 1);
+    rb_define_method(c_Crypter, "decrypt_compressed", (ruby_method*) &keyczar_decrypt_compressed, 1);
 
     rb_define_method(c_Signer, "sign", (ruby_method*) &keyczar_sign, 1);
     rb_define_method(c_Signer, "verify", (ruby_method*) &keyczar_verify, 2);
