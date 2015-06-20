@@ -42,6 +42,7 @@ extern "C" {
   static VALUE keyczar_encrypt(VALUE self, VALUE plaintext){
     keyczar::Crypter* crypter;
     Data_Get_Struct(self, keyczar::Crypter, crypter);
+    crypter->set_compression(keyczar::Keyczar::NO_COMPRESSION);
 
     Check_Type(plaintext, T_STRING);
     std::string cryptext=crypter->Encrypt(RSTRING_PTR(plaintext));
@@ -63,6 +64,7 @@ extern "C" {
   static VALUE keyczar_decrypt(VALUE self, VALUE cryptext){
     keyczar::Crypter* crypter;
     Data_Get_Struct(self, keyczar::Crypter, crypter);
+    crypter->set_compression(keyczar::Keyczar::NO_COMPRESSION);
 
     Check_Type(cryptext, T_STRING);
     std::string plaintext=crypter->Decrypt(RSTRING_PTR(cryptext));
